@@ -1,0 +1,5 @@
+{
+  "name": "Snapchat Login Clone",
+  "description": "A high-fidelity Snapchat login page replica built with React and Tailwind CSS, featuring form validation and responsive design.",
+  "requestFramePermissions": ["geolocation"]
+}
