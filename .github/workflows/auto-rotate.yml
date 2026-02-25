@@ -1,0 +1,46 @@
+name: Auto Rotate Infrastructure
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'  # Runs every 3 hours
+  workflow_dispatch:      # Allows manual triggering from the GitHub Actions tab
+
+jobs:
+  rotate:
+    name: Execute Rotation Script
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Make Script Executable
+        run: chmod +x ./rotate.sh
+
+      - name: Run Rotation Script
+        run: ./rotate.sh
+        env:
+          # Secrets must be configured in GitHub Repository Settings
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+
+      - name: Commit Last Deploy Timestamp
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .last_deploy
+          git commit -m "chore: update last deploy timestamp [skip ci]" || echo "No changes to commit"
+          git push
